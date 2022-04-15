@@ -5,20 +5,39 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 contract ERC20 is IERC20 {
+    address private _owner;
+
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowed;
+    uint256 private _totalSupply;
+
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals
+    ) {
+        _owner = msg.sender;
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
+    }
+
     /**
      * @dev Returns the amount of tokens in existence.
      */
     function totalSupply() external view returns (uint256) {
-        console.log("Not implemented");
-        return 0;
+        return _totalSupply;
     }
 
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
     function balanceOf(address account) external view returns (uint256) {
-        console.log("Not implemented");
-        return 0;
+        return _balances[account];
     }
 
     /**
@@ -29,7 +48,12 @@ contract ERC20 is IERC20 {
      * Emits a {Transfer} event.
      */
     function transfer(address to, uint256 amount) external returns (bool) {
-        console.log("Not implemented");
+        require(_balances[msg.sender] >= amount, "Not enough tokens");
+
+        _balances[msg.sender] -= amount;
+        _balances[to] += amount;
+        emit Transfer(msg.sender, to, amount);
+
         return true;
     }
 
@@ -45,8 +69,7 @@ contract ERC20 is IERC20 {
         view
         returns (uint256)
     {
-        console.log("Not implemented");
-        return 0;
+        return _allowed[owner][spender];
     }
 
     /**
@@ -64,7 +87,8 @@ contract ERC20 is IERC20 {
      * Emits an {Approval} event.
      */
     function approve(address spender, uint256 amount) external returns (bool) {
-        console.log("Not implemented");
+        _allowed[msg.sender][spender] += amount;
+        emit Approval(msg.sender, spender, amount);
         return true;
     }
 
@@ -82,7 +106,29 @@ contract ERC20 is IERC20 {
         address to,
         uint256 amount
     ) external returns (bool) {
-        console.log("Not implemented");
+        require(_allowed[from][msg.sender] >= amount, "Not enough allowed");
+        require(_balances[from] >= amount, "Not enough tokens");
+        _allowed[from][msg.sender] -= amount;
+        _balances[from] -= amount;
+        _balances[to] += amount;
+        emit Transfer(from, to, amount);
+        return true;
+    }
+
+    function mint(address account, uint256 amount) external returns (bool) {
+        require(msg.sender == _owner, "Caller is not an owner");
+        _totalSupply += amount;
+        _balances[account] += amount;
+        emit Transfer(address(0), account, amount);
+        return true;
+    }
+
+    function burn(address account, uint256 amount) external returns (bool) {
+        require(msg.sender == _owner, "Caller is not an owner");
+        require(_balances[account] >= amount, "Not enough tokens");
+        _totalSupply -= amount;
+        _balances[account] -= amount;
+        emit Transfer(account, address(0), amount);
         return true;
     }
 }
