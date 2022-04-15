@@ -2,6 +2,9 @@
   "name": "erc20",
   "version": "1.0.0",
   "license": "MIT",
+  "engines": {
+    "node": "^16"
+  },
   "dependencies": {
     "@ethersproject/abi": "^5.0.0",
     "@ethersproject/bytes": "^5.0.0",
