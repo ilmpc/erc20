@@ -47,6 +47,7 @@ contract ERC20 is IERC20 {
      * Emits a {Transfer} event.
      */
     function transfer(address to, uint256 amount) external returns (bool) {
+        require(to != address(0), "Invalid address");
         require(_balances[msg.sender] >= amount, "Not enough tokens");
 
         _balances[msg.sender] -= amount;
@@ -105,6 +106,7 @@ contract ERC20 is IERC20 {
         address to,
         uint256 amount
     ) external returns (bool) {
+        require(from != address(0) && to != address(0), "Invalid address");
         require(_allowed[from][msg.sender] >= amount, "Not enough allowed");
         require(_balances[from] >= amount, "Not enough tokens");
         _allowed[from][msg.sender] -= amount;

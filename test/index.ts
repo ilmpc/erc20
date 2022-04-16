@@ -9,6 +9,7 @@ enum Errors {
   NotAnOwner = "Caller is not an owner",
   NotEnoughTokens = "Not enough tokens",
   NotEnoughAllowed = "Not enough allowed",
+  InvalidAddress = "Invalid address",
 }
 
 const TOKEN_NAME = "SHIIISH";
@@ -139,6 +140,11 @@ describe("ERC20", async () => {
         [AMOUNT.mul(-1), AMOUNT]
       );
     });
+    it("should revert if 'to' is 0x0", async () => {
+      await expect(
+        token.transfer(ethers.constants.AddressZero, AMOUNT)
+      ).to.revertedWith(Errors.InvalidAddress);
+    });
     it("should revert if not enough tokens", async () => {
       await expect(
         token.transfer(others[0].address, AMOUNT)
@@ -175,6 +181,16 @@ describe("ERC20", async () => {
         [owner, others[0]],
         [AMOUNT.mul(-1), AMOUNT]
       );
+    });
+    it("should revert if 'from' is 0x0", async () => {
+      await expect(
+        token.transferFrom(ethers.constants.AddressZero, owner.address, AMOUNT)
+      ).to.revertedWith(Errors.InvalidAddress);
+    });
+    it("should revert if 'to' is 0x0", async () => {
+      await expect(
+        token.transferFrom(owner.address, ethers.constants.AddressZero, AMOUNT)
+      ).to.revertedWith(Errors.InvalidAddress);
     });
     it("should revert if not allowed enough", async () => {
       await mintAndCheck(AMOUNT);
